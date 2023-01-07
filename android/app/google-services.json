@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "853385139486",
+    "firebase_url": "https://flutter-backend-cf57b-default-rtdb.firebaseio.com",
+    "project_id": "flutter-backend-cf57b",
+    "storage_bucket": "flutter-backend-cf57b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:853385139486:android:4b256521ad7295e555650f",
+        "android_client_info": {
+          "package_name": "com.example.donations_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "853385139486-39mgasv99ndjgd1f1plbcfop95ek2ncj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdkMv-mPf2rG3xLNgNmbg9iQpuw1Ixf5k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "853385139486-39mgasv99ndjgd1f1plbcfop95ek2ncj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:853385139486:android:a1da54d055e357cf55650f",
+        "android_client_info": {
+          "package_name": "com.example.flutter_maps"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "853385139486-39mgasv99ndjgd1f1plbcfop95ek2ncj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdkMv-mPf2rG3xLNgNmbg9iQpuw1Ixf5k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "853385139486-39mgasv99ndjgd1f1plbcfop95ek2ncj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:853385139486:android:fff25902fe07ff8a55650f",
+        "android_client_info": {
+          "package_name": "com.example.rentpay"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "853385139486-39mgasv99ndjgd1f1plbcfop95ek2ncj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdkMv-mPf2rG3xLNgNmbg9iQpuw1Ixf5k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "853385139486-39mgasv99ndjgd1f1plbcfop95ek2ncj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
