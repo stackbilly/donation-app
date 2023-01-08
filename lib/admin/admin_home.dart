@@ -82,6 +82,11 @@ class AdminHome extends StatelessWidget {
                   ),
                 ),
                 ListTile(
+                  title: const Text('Reports'),
+                  leading: const Icon(Icons.receipt),
+                  onTap: (() => true),
+                ),
+                ListTile(
                   title: const Text('Donations'),
                   leading: const Icon(Icons.list_alt),
                   onTap: (() => Navigator.of(context)
@@ -90,20 +95,22 @@ class AdminHome extends StatelessWidget {
                       )))),
                 ),
                 ListTile(
-                  title: const Text('Closed Campaigns'),
-                  leading: const Icon(Icons.history),
+                  title: const Text('Recycle Bin'),
+                  leading: const Icon(Icons.recycling_sharp),
                   onTap: (() => Navigator.of(context)
                           .push(DonationsApp.route(ClosedCampaigns(
                         theme: theme,
                       )))),
                 ),
                 ListTile(
-                  title: const Text('Charity Program Applicants'),
-                  leading: const Icon(Icons.recent_actors),
-                  onTap: (() => Navigator.of(context)
-                          .push(DonationsApp.route(CharityApplicantsPage(
-                        theme: theme,
-                      )))),
+                  title: const Text('Closed Campaigns'),
+                  leading: const Icon(Icons.auto_delete),
+                  onTap: (() => true),
+                ),
+                ListTile(
+                  title: const Text('Logout'),
+                  leading: const Icon(Icons.logout),
+                  onTap: (() => true),
                 ),
               ],
             ),
@@ -122,6 +129,7 @@ class AdminHome extends StatelessWidget {
                   theme: theme,
                 )))),
             tooltip: 'Create Campaign',
+            backgroundColor: const Color(0xff6750a4),
             child: const Icon(
               Icons.add,
               size: 25,
@@ -142,8 +150,10 @@ class ContributionList extends StatefulWidget {
 }
 
 class _ContributionListState extends State<ContributionList> {
-  final Stream<QuerySnapshot> contributionStream =
-      FirebaseFirestore.instance.collection('donations').snapshots();
+  final Stream<QuerySnapshot> contributionStream = FirebaseFirestore.instance
+      .collection('donations')
+      .orderBy('timestamp', descending: true)
+      .snapshots();
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -186,7 +196,7 @@ class _ContributionListState extends State<ContributionList> {
                     title: Text(
                         '${data.docs[index]['name']}, Tel: ${data.docs[index]['phoneNo']}'),
                     subtitle: Text(
-                        'Donated ${data.docs[index]['amount']} for ${data.docs[index]['category']} on ${data.docs[index]['date']}'),
+                        'Donated ${data.docs[index]['amount']} for ${data.docs[index]['category']} on ${(data.docs[index]['timestamp'] as Timestamp).toDate().toString().split(' ').first}'),
                   );
                 }));
           },

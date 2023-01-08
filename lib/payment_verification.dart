@@ -37,7 +37,7 @@ class _PaymentVerificationState extends State<PaymentVerification> {
       'phoneNo': widget.donation.phoneNo,
       'amount': widget.donation.amount,
       'category': widget.category,
-      'date': DateTime.now().toString().split(' ').first
+      'timestamp': Timestamp.now(),
     }).catchError((error) {
       debugPrint('Error Occurred $error');
     });

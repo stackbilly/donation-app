@@ -1,16 +1,28 @@
 # donations_app
 
-A new Flutter project.
+An android application built with flutter for making donations.
 
-## Getting Started
+## Features
+The following are the features currently available in the app
+### Donation Calculator
+The application has a built in calculator for adding donations in realtime and
+subtracting donation amounts when spent or distributed.
 
-This project is a starting point for a Flutter application.
+### Donation Campaigns
+The application allows creation of donation campaigns that last for a specified period.
+A donation campaign must have a title, a profile image, target amount and the campaign 
+duration. 
+When this duration is completed the campaign is automatically deleted. 
+Whenever a donation is made through a campaign its totals are updated automatically
 
-A few resources to get you started if this is your first Flutter project:
+### M-pesa Daraja API
+The application uses the daraja API to initiate M-pesa transaction to facilitate transfer
+of funds from the donors to a specified party.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Adminstrator Roles
+ Creating, editing and deleting donation campaigns
+ Tracking of funds and donations received
+ Distributing donations recived to respected parties.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+ More features will be added in due time to enhance user experience.
+ e-mail: livingstoneochadia95@gmail.com

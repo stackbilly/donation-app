@@ -1,10 +1,7 @@
 import 'package:donations_app/admin/admin_auth.dart';
-import 'package:donations_app/app.dart';
-import 'package:donations_app/fields/join_charity_program.dart';
-import 'package:donations_app/payment_verification.dart';
 import 'package:donations_app/tabs/active_campaigns_tab.dart';
 import 'package:donations_app/tabs/home_tab.dart';
-import 'package:donations_app/tabs/profile.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
@@ -25,17 +22,16 @@ class _HomePageState extends State<HomePage> {
     Tab(
       text: 'Campaigns',
     ),
-    Tab(
-      text: 'Profile',
-    )
   ];
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-        length: 3,
+        length: 2,
         child: MaterialApp(
-            theme: ThemeData(primarySwatch: Colors.indigo),
+            theme: ThemeData(
+              primarySwatch: Colors.indigo,
+            ),
             darkTheme: ThemeData.dark(),
             themeMode: (widget.theme) ? ThemeMode.dark : ThemeMode.light,
             debugShowCheckedModeBanner: false,
@@ -77,51 +73,50 @@ class _HomePageState extends State<HomePage> {
                             child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: Row(
-                            children: const [
-                              CircleAvatar(
+                            children: [
+                              const CircleAvatar(
                                 backgroundImage: AssetImage('assets/trial.png'),
                                 radius: 15,
                               ),
                               Padding(
-                                padding: EdgeInsets.only(left: 5.0),
-                                child: Text(
-                                  'Charity Association',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              )
+                                  padding: const EdgeInsets.only(left: 5.0),
+                                  child: InkWell(
+                                    onLongPress: (() => Navigator.of(context)
+                                        .push(CupertinoPageRoute(
+                                            builder: (context) => AdminLogin(
+                                                theme: widget.theme)))),
+                                    child: const Text(
+                                      'Charity Association',
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ))
                             ],
                           ),
                         )),
                       ),
                     ),
                     ListTile(
-                      leading: Icon(
-                        Icons.contact_phone,
-                        color: Colors.blue[700],
+                      leading: const Icon(
+                        Icons.person_rounded,
+                      ),
+                      title: const Text('Account'),
+                      onTap: (() => true),
+                    ),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.contact_support,
                       ),
                       title: const Text('Contact us'),
                       onTap: (() => true),
                     ),
                     ListTile(
-                      leading: Icon(
-                        Icons.people_sharp,
-                        color: Colors.red[700],
+                      leading: const Icon(
+                        Icons.info_outline,
                       ),
-                      title: const Text('Join Charity Program'),
-                      onTap: (() => Navigator.of(context).push(
-                              DonationsApp.bounceInRoute(JoinCharityProgram(
-                            theme: widget.theme,
-                          )))),
-                    ),
-                    ListTile(
-                      leading: Icon(
-                        Icons.info,
-                        color: Colors.indigo[500],
-                      ),
-                      title: const Text('About Charity Association'),
+                      title: const Text('About us'),
                       onTap: (() => true),
                     ),
                     ListTile(
@@ -130,9 +125,8 @@ class _HomePageState extends State<HomePage> {
                               Icons.light_mode,
                               color: Colors.white,
                             )
-                          : Icon(
+                          : const Icon(
                               Icons.dark_mode,
-                              color: Colors.blueGrey[900],
                             ),
                       title:
                           Text((widget.theme) ? "Light Theme" : "Dark Theme"),
@@ -147,7 +141,6 @@ class _HomePageState extends State<HomePage> {
                 children: <Widget>[
                   HomePageTab(theme: widget.theme),
                   CampaignsTab(darkTheme: widget.theme),
-                  ProfileTab(theme: widget.theme)
                 ],
               ),
             )));

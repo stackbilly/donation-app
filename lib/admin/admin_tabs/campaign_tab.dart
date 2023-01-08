@@ -20,19 +20,6 @@ class CampaignTab extends StatefulWidget {
 class _CampaignTabState extends State<CampaignTab> {
   CollectionReference history =
       FirebaseFirestore.instance.collection('campaignHistory');
-  TimeOfDay? midnight;
-  @override
-  void initState() {
-    super.initState();
-
-    midnight = const TimeOfDay(hour: 24, minute: 0);
-
-    if (TimeOfDay.now() == midnight) {
-      debugPrint("It's midnight!");
-    } else {
-      debugPrint("It is not midnight");
-    }
-  }
 
   Future<void> save(
       String title, int targetAmount, int total, int duration) async {
@@ -189,7 +176,6 @@ class _CampaignTabState extends State<CampaignTab> {
                                 '${((data.docs[index]['total'] / data.docs[index]['targetAmount']) * 100).toInt()}%',
                                 style: const TextStyle(color: Colors.white),
                               ),
-                              // linearStrokeCap: LinearStrokeCap.butt,
                               progressColor: Colors.red,
                               backgroundColor: Colors.blue,
                               percent: (data.docs[index]['total'] <=

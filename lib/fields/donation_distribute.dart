@@ -173,7 +173,7 @@ class _DistributeDonationState extends State<DistributeDonation> {
                                       builder: ((context) {
                                         return AlertDialog(
                                           content: SizedBox(
-                                            height: 100,
+                                            height: 120,
                                             child: Center(
                                               child: Column(
                                                 crossAxisAlignment:
