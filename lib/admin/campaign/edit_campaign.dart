@@ -69,31 +69,29 @@ class _EditScreenState extends State<EditScreen> {
   }
 
   Future<void> updateCampaign() {
-//add snapshot.get();;;
     DocumentReference olddocumentReference = FirebaseFirestore.instance
         .collection('campaigns')
-        .doc(widget.campaign.title.trim());
-    DocumentReference newdocumentReference = FirebaseFirestore.instance
-        .collection('campaigns')
-        .doc(titleController!.text.trim());
+        .doc(widget.campaign.id);
     return FirebaseFirestore.instance.runTransaction((transaction) async {
-      widget.campaign.title = titleController!.text;
-      widget.campaign.description = campaignDescription!.text;
-      widget.campaign.targetAmount =
-          int.tryParse(targetAmountController!.text)!;
-      widget.campaign.days = int.tryParse(daysController!.text)!;
-      widget.campaign.imageUrl = imageController!.text;
-
       transaction.delete(olddocumentReference);
+    });
+  }
 
-      transaction.set(newdocumentReference, {
-        'title': titleController!.text,
-        'description': campaignDescription!.text,
-        'targetAmount': int.tryParse(targetAmountController!.text),
-        'days': int.tryParse(daysController!.text),
-        'imageUrl': imageController!.text,
-        'total': widget.campaign.total,
-      });
+  Future<DocumentReference<Object?>> saveCampaign(
+      int total, int totalSpent) async {
+    CollectionReference campaigns =
+        FirebaseFirestore.instance.collection("campaigns");
+
+    return campaigns.add({
+      'title': titleController!.text,
+      'description': campaignDescription!.text,
+      'targetAmount': int.tryParse(targetAmountController!.text),
+      'days': int.tryParse(daysController!.text),
+      'imageUrl': imageController!.text,
+      'total': total,
+      'totalSpent': totalSpent,
+      'state': CampaignState.active.name,
+      'timestamp': Timestamp.now(),
     });
   }
 
@@ -202,13 +200,30 @@ class _EditScreenState extends State<EditScreen> {
                           vertical: 10.0, horizontal: 16.0),
                       child: ElevatedButton(
                         onPressed: (() {
-                          updateCampaign()
-                              .then((_) => Navigator.pushAndRemoveUntil(
-                                  context,
-                                  DonationsApp.route(AdminHome(
-                                    theme: widget.theme,
-                                  )),
-                                  (Route<dynamic> route) => false));
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                updateCampaign()
+                                    .then((value) => saveCampaign(
+                                        widget.campaign.total,
+                                        widget.campaign.totalSpent))
+                                    .then(
+                                        (value) => Navigator.pushAndRemoveUntil(
+                                            context,
+                                            DonationsApp.route(AdminHome(
+                                              theme: widget.theme,
+                                            )),
+                                            (Route<dynamic> route) => false));
+                                return const AlertDialog(
+                                  content: SizedBox.square(
+                                    dimension: 70,
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
+                                );
+                              },
+                              barrierDismissible: false);
                         }),
                         //check how to disable button
                         style: ElevatedButton.styleFrom(

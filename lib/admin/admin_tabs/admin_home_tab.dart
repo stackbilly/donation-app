@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:donations_app/fields/donation_distribute.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -19,6 +21,8 @@ class _AdminHomeTabState extends State<AdminHomeTab> {
   @override
   Widget build(BuildContext context) {
     final List<ChartData> chartData = [];
+    Map<String, dynamic> upKeepData = {};
+    Map<String, dynamic> feesData = {};
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.indigo),
@@ -119,150 +123,170 @@ class _AdminHomeTabState extends State<AdminHomeTab> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    SizedBox(
-                      height: 150,
-                      width: 150,
-                      child: Container(
-                        decoration: BoxDecoration(color: Colors.red[600]),
-                        child: StreamBuilder(
-                          stream: _donationsStreams,
-                          builder: ((context, snapshot) {
-                            if (snapshot.hasError) {
-                              showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return const AlertDialog(
-                                      content: SizedBox(
-                                        height: 130,
-                                        child: Center(
-                                          child: Text('An error occurred!'),
+                    InkWell(
+                      onTap: (() =>
+                          Navigator.of(context).push(CupertinoPageRoute(
+                              builder: (context) => DistributeDonation(
+                                    id: '',
+                                    title: 'Fees',
+                                    total: feesData['feesTotal'],
+                                    theme: widget.theme,
+                                  )))),
+                      child: SizedBox(
+                        height: 150,
+                        width: 150,
+                        child: Container(
+                          decoration: BoxDecoration(color: Colors.red[600]),
+                          child: StreamBuilder(
+                            stream: _donationsStreams,
+                            builder: ((context, snapshot) {
+                              if (snapshot.hasError) {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return const AlertDialog(
+                                        content: SizedBox(
+                                          height: 130,
+                                          child: Center(
+                                            child: Text('An error occurred!'),
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  });
-                            }
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            if (!snapshot.hasData) {
-                              return const Center(
-                                child: Text(
-                                  "No available data!",
-                                  style: TextStyle(
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 18),
-                                ),
-                              );
-                            }
-                            Map<String, dynamic> data = {};
-                            if (snapshot.hasData) {
-                              snapshot.data!.docs.map((DocumentSnapshot doc) {
-                                data = doc.data()! as Map<String, dynamic>;
-                              }).toList();
-                            }
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 35.0),
-                                  child: Center(
-                                    child: Text(
-                                      'Fees \nDonations',
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white),
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 10.0),
+                                      );
+                                    });
+                              }
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              if (!snapshot.hasData) {
+                                return const Center(
                                   child: Text(
-                                    'Ksh ${data['feesTotal'].toString()}',
-                                    style: const TextStyle(
-                                        color: Colors.white,
+                                    "No available data!",
+                                    style: TextStyle(
+                                        color: Colors.red,
                                         fontWeight: FontWeight.w500,
                                         fontSize: 18),
                                   ),
-                                ),
-                              ],
-                            );
-                          }),
+                                );
+                              }
+                              if (snapshot.hasData) {
+                                snapshot.data!.docs.map((DocumentSnapshot doc) {
+                                  feesData =
+                                      doc.data()! as Map<String, dynamic>;
+                                }).toList();
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  const Padding(
+                                    padding: EdgeInsets.only(top: 35.0),
+                                    child: Center(
+                                      child: Text(
+                                        'Fees \nDonations',
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10.0),
+                                    child: Text(
+                                      'Ksh ${feesData['feesTotal'].toString()}',
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 18),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
+                          ),
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 150,
-                      width: 150,
-                      child: Container(
-                        decoration: const BoxDecoration(color: Colors.indigo),
-                        child: StreamBuilder(
-                          stream: _donationsStreams,
-                          builder: ((context, snapshot) {
-                            if (snapshot.hasError) {
-                              showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return const AlertDialog(
-                                      content: SizedBox(
-                                        height: 130,
-                                        child: Center(
-                                          child: Text('An error occurred!'),
+                    InkWell(
+                      onTap: (() =>
+                          Navigator.of(context).push(CupertinoPageRoute(
+                              builder: (context) => DistributeDonation(
+                                    id: '',
+                                    title: 'Upkeep',
+                                    total: upKeepData['upkeepTotal'],
+                                    theme: widget.theme,
+                                  )))),
+                      child: SizedBox(
+                        height: 150,
+                        width: 150,
+                        child: Container(
+                          decoration: const BoxDecoration(color: Colors.indigo),
+                          child: StreamBuilder(
+                            stream: _donationsStreams,
+                            builder: ((context, snapshot) {
+                              if (snapshot.hasError) {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return const AlertDialog(
+                                        content: SizedBox(
+                                          height: 130,
+                                          child: Center(
+                                            child: Text('An error occurred!'),
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  });
-                            }
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
+                                      );
+                                    });
+                              }
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
 
-                            if (!snapshot.hasData) {
-                              return const Center(
-                                child: Text("No available data"),
-                              );
-                            }
-                            Map<String, dynamic> data = {};
-                            if (snapshot.hasData) {
-                              snapshot.data!.docs.map((DocumentSnapshot doc) {
-                                data = doc.data()! as Map<String, dynamic>;
-                              }).toList();
-                            }
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 35.0),
-                                  child: Center(
-                                    child: Text(
-                                      'Upkeep\nDonations',
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white),
+                              if (!snapshot.hasData) {
+                                return const Center(
+                                  child: Text("No available data"),
+                                );
+                              }
+                              if (snapshot.hasData) {
+                                snapshot.data!.docs.map((DocumentSnapshot doc) {
+                                  upKeepData =
+                                      doc.data()! as Map<String, dynamic>;
+                                }).toList();
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  const Padding(
+                                    padding: EdgeInsets.only(top: 35.0),
+                                    child: Center(
+                                      child: Text(
+                                        'Upkeep\nDonations',
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 10.0),
-                                  child: Text(
-                                    'Ksh ${data['upkeepTotal'].toString()}',
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 18),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10.0),
+                                    child: Text(
+                                      'Ksh ${upKeepData['upkeepTotal'].toString()}',
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 18),
+                                    ),
                                   ),
-                                ),
-                              ],
-                            );
-                          }),
+                                ],
+                              );
+                            }),
+                          ),
                         ),
                       ),
                     )

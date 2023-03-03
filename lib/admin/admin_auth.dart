@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:donations_app/admin/admin_home.dart';
 import 'package:donations_app/app.dart';
 import 'package:donations_app/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 
 class AdminLogin extends StatefulWidget {
   const AdminLogin({super.key, required this.theme});
@@ -18,25 +21,53 @@ class _AdminLoginState extends State<AdminLogin> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  // final user = FirebaseAuth.instance.currentUser;
+  int? code;
 
-  // @override
-  // void initState() {
-  //   super.initState();
+  bool isUser = false;
 
-  //   if (user != null) {
-  //     Navigator.push(
-  //       context,
-  //       DonationsApp.route(const AdminHome()),
-  //     );
-  //   }
-  // }
+  int generateCode() {
+    var random = Random();
 
-  Future<void> authenticate() async {
+    int code = random.nextInt(900000) + 100000;
+    return code;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    code = generateCode();
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+
+    super.dispose();
+  }
+
+  Future<void> mailCode(int code) async {
+    final Email email = Email(
+      body: 'Verifiication code: $code',
+      recipients: [(emailController.text)],
+      subject: 'Verification code for login @ ${DateTime.now()}',
+      isHTML: false,
+    );
+    await FlutterEmailSender.send(email);
+  }
+
+  Future<bool> authenticate() async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim());
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+              email: emailController.text.trim(),
+              password: passwordController.text.trim());
+      if (userCredential.user != null) {
+        setState(() {
+          isUser = true;
+        });
+      }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-Found') {
         showDialog(
@@ -89,14 +120,7 @@ class _AdminLoginState extends State<AdminLogin> {
             });
       }
     }
-  }
-
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-
-    super.dispose();
+    return isUser;
   }
 
   @override
@@ -178,12 +202,55 @@ class _AdminLoginState extends State<AdminLogin> {
                         child: ElevatedButton(
                           onPressed: (() {
                             if (_formKey.currentState!.validate()) {
-                              // authenticate();
-                              Navigator.of(context).pushAndRemoveUntil(
-                                  DonationsApp.route(AdminHome(
-                                    theme: widget.theme,
-                                  )),
-                                  (Route<dynamic> route) => false);
+                              authenticate().then((value) {
+                                if (value) {
+                                  mailCode(code!).then((value) {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            content: SizedBox(
+                                              height: 120,
+                                              width: 300,
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  const Text(
+                                                    "To verify it is you we've sent you the verification code, check your email",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w500),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 15.0),
+                                                    child: TextButton(
+                                                        onPressed: (() => Navigator
+                                                                .of(context)
+                                                            .pushAndRemoveUntil(
+                                                                DonationsApp.route(
+                                                                    UserVerification(
+                                                                        code:
+                                                                            code!,
+                                                                        theme: widget
+                                                                            .theme)),
+                                                                (Route<dynamic>
+                                                                        route) =>
+                                                                    false)),
+                                                        child:
+                                                            const Text("OK")),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        barrierDismissible: false);
+                                  });
+                                }
+                              });
                             }
                           }),
                           style: ElevatedButton.styleFrom(
@@ -201,6 +268,119 @@ class _AdminLoginState extends State<AdminLogin> {
                     ],
                   ),
                 ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class UserVerification extends StatefulWidget {
+  const UserVerification({super.key, required this.code, required this.theme});
+
+  final int code;
+  final bool theme;
+
+  @override
+  State<UserVerification> createState() => _UserVerificationState();
+}
+
+class _UserVerificationState extends State<UserVerification> {
+  final GlobalKey<FormState> _formKey = GlobalKey();
+
+  TextEditingController codeController = TextEditingController();
+
+  @override
+  void dispose() {
+    codeController.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: "User verification",
+      debugShowCheckedModeBanner: false,
+      darkTheme: ThemeData.dark(),
+      themeMode: widget.theme ? ThemeMode.dark : ThemeMode.light,
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text("User Veification"),
+        ),
+        body: Center(
+          child: SizedBox(
+            width: 250,
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextFormField(
+                    validator: ((value) {
+                      if (value == null || value.isEmpty) {
+                        return "This field cannot be empty";
+                      } else {
+                        return null;
+                      }
+                    }),
+                    controller: codeController,
+                    decoration: InputDecoration(
+                        labelText: 'Verification Code',
+                        prefixIcon: const Icon(Icons.code),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0))),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: ElevatedButton(
+                        onPressed: (() {
+                          if (_formKey.currentState!.validate()) {
+                            if (int.tryParse(codeController.text) ==
+                                widget.code) {
+                              Navigator.of(context).pushAndRemoveUntil(
+                                  DonationsApp.route(
+                                      AdminHome(theme: widget.theme)),
+                                  (route) => false);
+                            } else {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const Text(
+                                        "Invalid Code!",
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                      content: SizedBox(
+                                          height: 100,
+                                          child: Center(
+                                            child: TextButton(
+                                                onPressed: (() =>
+                                                    Navigator.of(context)
+                                                        .pushAndRemoveUntil(
+                                                            DonationsApp.route(
+                                                                AdminLogin(
+                                                              theme:
+                                                                  widget.theme,
+                                                            )),
+                                                            (route) => false)),
+                                                child: const Text("Back")),
+                                          )),
+                                    );
+                                  },
+                                  barrierDismissible: false);
+                            }
+                          }
+                        }),
+                        style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0)),
+                            minimumSize: const Size(150, 45)),
+                        child: const Text("Verify")),
+                  )
+                ],
               ),
             ),
           ),

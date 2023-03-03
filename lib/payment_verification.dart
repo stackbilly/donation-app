@@ -32,7 +32,7 @@ class _PaymentVerificationState extends State<PaymentVerification> {
   Future save() async {
     CollectionReference donations =
         FirebaseFirestore.instance.collection('donations');
-    return donations.doc(widget.donation.phoneNo.trim()).set({
+    return donations.add({
       'name': widget.donation.name,
       'phoneNo': widget.donation.phoneNo,
       'amount': widget.donation.amount,

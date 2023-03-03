@@ -5,7 +5,6 @@ import 'package:donations_app/admin/campaign/campaign.dart';
 import 'package:donations_app/admin/campaign/edit_campaign.dart';
 import 'package:donations_app/app.dart';
 import 'package:donations_app/fields/donation_distribute.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
@@ -21,34 +20,23 @@ class _CampaignTabState extends State<CampaignTab> {
   CollectionReference history =
       FirebaseFirestore.instance.collection('campaignHistory');
 
-  Future<void> save(
-      String title, int targetAmount, int total, int duration) async {
-    return history.doc(title.trim()).set({
-      'title': title,
-      'targetAmount': targetAmount,
-      'total': total,
-      'duration': duration,
-      'status': 'closed',
-      'date': DateTime.now().toString().split(' ').first,
-    });
-  }
+  Future<void> adjustCampaignState(
+      CampaignState state, String campaignId) async {
+    DocumentReference documentReference =
+        FirebaseFirestore.instance.collection("campaigns").doc(campaignId);
 
-  Future<void> deleteCampaign(
-      String id, BuildContext context, String imageUrl) async {
-    CollectionReference campaigns =
-        FirebaseFirestore.instance.collection('campaigns');
-    await FirebaseStorage.instance.refFromURL(imageUrl).delete();
-    return campaigns.doc(id).delete().then((value) {
-      var snackBar = const SnackBar(content: Text('Deleting campaign...'));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      transaction.update(documentReference, {'state': state.name});
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final Stream<QuerySnapshot> campaignStreams =
-        FirebaseFirestore.instance.collection('campaigns').snapshots();
-    Campaign campaign = Campaign('', '', 0, 0, '', 0);
+    final Stream<QuerySnapshot> campaignStreams = FirebaseFirestore.instance
+        .collection('campaigns')
+        .where('state', isEqualTo: CampaignState.active.name)
+        .snapshots();
+    Campaign campaign = Campaign('', '', '', 0, 0, '', 0, 0);
     return StreamBuilder<QuerySnapshot>(
       stream: campaignStreams,
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -194,6 +182,8 @@ class _CampaignTabState extends State<CampaignTab> {
                                 children: <Widget>[
                                   TextButton(
                                     onPressed: (() {
+                                      campaign.id =
+                                          data.docs[index].reference.id;
                                       campaign.title =
                                           data.docs[index]['title'];
                                       campaign.description =
@@ -205,6 +195,8 @@ class _CampaignTabState extends State<CampaignTab> {
                                           data.docs[index]['imageUrl'];
                                       campaign.total =
                                           data.docs[index]['total'];
+                                      campaign.totalSpent =
+                                          data.docs[index]['totalSpent'];
                                       Navigator.push(
                                           context,
                                           DonationsApp.bounceInRoute(EditScreen(
@@ -270,31 +262,14 @@ class _CampaignTabState extends State<CampaignTab> {
                                                             //rem to add func to delete campaign
                                                             TextButton(
                                                               onPressed: () {
-                                                                save(
-                                                                    data.docs[
-                                                                            index][
-                                                                        'title'],
-                                                                    data.docs[
+                                                                adjustCampaignState(
+                                                                    CampaignState
+                                                                        .deleted,
+                                                                    data
+                                                                        .docs[
                                                                             index]
-                                                                        [
-                                                                        'targetAmount'],
-                                                                    data.docs[
-                                                                            index]
-                                                                        [
-                                                                        'total'],
-                                                                    data.docs[
-                                                                            index]
-                                                                        [
-                                                                        'days']);
-                                                                deleteCampaign(
-                                                                    titleController
-                                                                        .text
-                                                                        .trim(),
-                                                                    context,
-                                                                    data.docs[
-                                                                            index]
-                                                                        [
-                                                                        'imageUrl']);
+                                                                        .reference
+                                                                        .id);
                                                                 Navigator.pop(
                                                                     context);
                                                               },
@@ -365,10 +340,11 @@ class _CampaignTabState extends State<CampaignTab> {
                                         Navigator.of(context).push(
                                             DonationsApp.bounceInRoute(
                                                 DistributeDonation(
-                                                    category: data.docs[index]
-                                                        ['title'],
-                                                    total: data.docs[index]
-                                                        ['total'])));
+                                          title: data.docs[index]['title'],
+                                          id: data.docs[index].reference.id,
+                                          total: data.docs[index]['total'],
+                                          theme: widget.theme,
+                                        )));
                                       }
                                     }),
                                     child: Text(
@@ -377,15 +353,23 @@ class _CampaignTabState extends State<CampaignTab> {
                                           TextStyle(color: Colors.green[700]),
                                     ),
                                   ),
+                                  TextButton(
+                                    onPressed: (() {
+                                      adjustCampaignState(CampaignState.closed,
+                                          data.docs[index].reference.id);
+                                    }),
+                                    child: const Text('Close'),
+                                  ),
                                 ],
                               )),
                           Positioned(
-                              right: 8.0,
+                              right: 14.0,
                               bottom: 60.0,
                               child: Text(
-                                '${data.docs[index]['days']} days left',
-                                style: TextStyle(
-                                  color: Colors.blueGrey[300],
+                                '${data.docs[index]['state']}',
+                                style: const TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                  color: Colors.green,
                                 ),
                               ))
                         ],

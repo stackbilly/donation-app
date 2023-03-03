@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:donations_app/admin/admin_home.dart';
+import 'package:donations_app/admin/campaign/campaign.dart';
 import 'package:donations_app/app.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -60,22 +61,19 @@ class _CreateCampaignState extends State<CreateCampaign> {
 
   @override
   Widget build(BuildContext context) {
-    Future saveCampaign() async {
+    Future<DocumentReference<Object?>> saveCampaign() async {
       CollectionReference camapaigns =
           FirebaseFirestore.instance.collection('campaigns');
-      return camapaigns
-          .doc(campaignTitleController.text.trim())
-          .set({
-            'title': campaignTitleController.text,
-            'description': campaignDescription.text,
-            'targetAmount': int.tryParse(targetAmountController.text),
-            'days': int.tryParse(daysController.text),
-            'imageUrl': imageController.text,
-            'total': 0,
-            'totalSpent': 0,
-          })
-          .then((value) => debugPrint('Complete!'))
-          .catchError((err) => debugPrint(err));
+      return camapaigns.add({
+        'title': campaignTitleController.text,
+        'description': campaignDescription.text,
+        'targetAmount': int.tryParse(targetAmountController.text),
+        'days': int.tryParse(daysController.text),
+        'imageUrl': imageController.text,
+        'total': 0,
+        'totalSpent': 0,
+        'state': CampaignState.active.name,
+      });
     }
 
     return MaterialApp(
@@ -203,29 +201,45 @@ class _CreateCampaignState extends State<CreateCampaign> {
                               labelText: 'Select an image',
                               prefixIcon: const Icon(Icons.image)),
                           onTap: (() =>
-                              pickCampaignImage(campaignTitleController.text)
-                                  .then((value) {
-                                var snackBar = const SnackBar(
-                                    content: Text('Loading Image....'));
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(snackBar);
-                              })),
+                              pickCampaignImage(campaignTitleController.text)),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 10.0, horizontal: 16.0),
                         child: ElevatedButton(
-                          onPressed: (() {
-                            if (_formKey.currentState!.validate()) {
-                              saveCampaign().then((value) =>
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                      DonationsApp.route(AdminHome(
-                                        theme: widget.theme,
-                                      )),
-                                      (Route<dynamic> route) => false));
-                            }
-                          }),
+                          onPressed: imageController.text == "" ||
+                                  imageController.text.isEmpty
+                              ? null
+                              : (() {
+                                  if (_formKey.currentState!.validate()) {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          saveCampaign().then((value) =>
+                                              Navigator.of(context)
+                                                  .pushAndRemoveUntil(
+                                                      DonationsApp.route(
+                                                          AdminHome(
+                                                        theme: widget.theme,
+                                                      )),
+                                                      (Route<dynamic> route) =>
+                                                          false));
+                                          return const AlertDialog(
+                                            content: SizedBox.square(
+                                              dimension: 70,
+                                              child: Center(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        barrierDismissible: false);
+                                  }
+                                }),
                           style: ElevatedButton.styleFrom(
                               minimumSize: Size(
                                   MediaQuery.of(context).size.width / 3.5, 50),

@@ -1,12 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:donations_app/admin/admin_home.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class DistributeDonation extends StatefulWidget {
   const DistributeDonation(
-      {super.key, required this.category, required this.total});
+      {super.key,
+      required this.id,
+      required this.title,
+      required this.total,
+      required this.theme});
 
-  final String category;
+  final String id;
+  final String title;
   final int total;
+  final bool theme;
 
   @override
   State<DistributeDonation> createState() => _DistributeDonationState();
@@ -25,7 +33,7 @@ class _DistributeDonationState extends State<DistributeDonation> {
   void initState() {
     super.initState();
 
-    titleController = TextEditingController(text: widget.category);
+    titleController = TextEditingController(text: widget.title);
     amountController = TextEditingController();
     descriptionController = TextEditingController();
   }
@@ -39,44 +47,75 @@ class _DistributeDonationState extends State<DistributeDonation> {
     super.dispose();
   }
 
-  Future<void> updateAmountSpent(String campaignName, int amount) async {
+  Future<DocumentReference<Object?>> saveExpenditureInfo() async {
+    CollectionReference collRef =
+        FirebaseFirestore.instance.collection("expenditures");
+    return collRef.add({
+      "category": titleController!.text,
+      "amount": amountController!.text,
+      "reason": descriptionController!.text,
+      "timestamp": Timestamp.now()
+    });
+  }
+
+  Future<void> updateCampaignAmountSpent(int amount) async {
     DocumentReference documentReference =
-        FirebaseFirestore.instance.collection('totals').doc('total_donations');
+        FirebaseFirestore.instance.collection("campaigns").doc(widget.id);
     return FirebaseFirestore.instance.runTransaction((transaction) async {
-      if (campaignName != 'Fees' && campaignName != 'Upkeep') {
-        DocumentReference documentReference = FirebaseFirestore.instance
-            .collection('campaigns')
-            .doc(campaignName.trim());
-        DocumentSnapshot snapshot = await transaction.get(documentReference);
-        Map<String, dynamic> doc = snapshot.data()! as Map<String, dynamic>;
-        int newTotalSpent = doc['totalSpent'] + amount;
-        transaction.update(documentReference, {'totalSpent': newTotalSpent});
-      }
+      DocumentSnapshot snapshot = await transaction.get(documentReference);
+      Map<String, dynamic> data = snapshot.data()! as Map<String, dynamic>;
+      int newTotalAmountSpent = data['totalSpent'] + amount;
+      transaction
+          .update(documentReference, {'totalSpent': newTotalAmountSpent});
+    });
+  }
 
-      DocumentSnapshot totalSnapshot = await transaction.get(documentReference);
-      Map<String, dynamic> totalDoc =
-          totalSnapshot.data()! as Map<String, dynamic>;
-      int newDocTotalSpent = totalDoc['totalSpent'] + amount;
-      transaction.update(documentReference, {'totalSpent': newDocTotalSpent});
+  Future<void> updateGeneralTotal(int amount) async {
+    DocumentReference documentReference =
+        FirebaseFirestore.instance.collection("totals").doc("total_donations");
 
-      if (campaignName == 'Fees') {
-        int newFeesTotal = totalDoc['feesTotal'] - amount;
-        int newGeneralTotal = totalDoc['generalTotal'] - amount;
-        int newJointTotal = totalDoc['jointTotal'] - amount;
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(documentReference);
+      Map<String, dynamic> data = snapshot.data()! as Map<String, dynamic>;
+
+      int newTotalSpent = data['totalSpent'] + amount;
+      int newJointTotal = data['jointTotal'] - amount;
+
+      transaction.update(documentReference,
+          {'totalSpent': newTotalSpent, 'jointTotal': newJointTotal});
+    });
+  }
+
+  Future<void> updateGeneralAmountSpent(int amount) async {
+    DocumentReference documentReference =
+        FirebaseFirestore.instance.collection("totals").doc("total_donations");
+
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(documentReference);
+      Map<String, dynamic> data = snapshot.data()! as Map<String, dynamic>;
+
+      if (widget.title == 'Fees') {
+        int newFeesTotal = data['feesTotal'] - amount;
+        int newGeneralTotal = data['generalTotal'] - amount;
+        int newJointTotal = data['jointTotal'] - amount;
+        int newDocTotalSpent = data['totalSpent'] + amount;
         transaction.update(documentReference, {
           'feesTotal': newFeesTotal,
           'generalTotal': newGeneralTotal,
-          'jointTotal': newJointTotal
+          'jointTotal': newJointTotal,
+          'totalSpent': newDocTotalSpent,
         });
       }
-      if (campaignName == 'Upkeep') {
-        int newUpkeepTotal = totalDoc['upkeepTotal'] - amount;
-        int newGeneralTotal = totalDoc['generalTotal'] - amount;
-        int newJointTotal = totalDoc['jointTotal'] - amount;
+      if (widget.title == 'Upkeep') {
+        int newUpkeepTotal = data['upkeepTotal'] - amount;
+        int newGeneralTotal = data['generalTotal'] - amount;
+        int newJointTotal = data['jointTotal'] - amount;
+        int newDocTotalSpent = data['totalSpent'] + amount;
         transaction.update(documentReference, {
           'upkeepTotal': newUpkeepTotal,
           'generalTotal': newGeneralTotal,
-          'jointTotal': newJointTotal
+          'jointTotal': newJointTotal,
+          'totalSpent': newDocTotalSpent
         });
       }
     });
@@ -85,9 +124,11 @@ class _DistributeDonationState extends State<DistributeDonation> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Donation Distribution Page',
+      title: 'Donation Distribution',
       theme: ThemeData(primarySwatch: Colors.indigo),
       debugShowCheckedModeBanner: false,
+      darkTheme: ThemeData.dark(),
+      themeMode: widget.theme ? ThemeMode.dark : ThemeMode.light,
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Distribute Donation'),
@@ -195,9 +236,48 @@ class _DistributeDonationState extends State<DistributeDonation> {
                                         );
                                       }));
                                 } else {
-                                  updateAmountSpent(titleController!.text,
-                                      int.tryParse(amountController!.text)!);
-                                  Navigator.pop(context);
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        if (widget.title != 'Fees' &&
+                                            widget.title != 'Upkeep') {
+                                          saveExpenditureInfo()
+                                              .then((value) =>
+                                                  updateCampaignAmountSpent(
+                                                      int.tryParse(
+                                                          amountController!
+                                                              .text)!))
+                                              .then((value) => updateGeneralTotal(
+                                                  int.tryParse(
+                                                      amountController!.text)!))
+                                              .then((value) => Navigator.of(context)
+                                                  .push(CupertinoPageRoute(
+                                                      builder: (context) =>
+                                                          AdminHome(theme: widget.theme))));
+                                        }
+                                        if (widget.title == 'Fees' ||
+                                            widget.title == 'Upkeep') {
+                                          updateGeneralAmountSpent(int.tryParse(
+                                                  amountController!.text)!)
+                                              .then((value) => Navigator.of(
+                                                      context)
+                                                  .push(CupertinoPageRoute(
+                                                      builder: (context) =>
+                                                          AdminHome(
+                                                              theme: widget
+                                                                  .theme))));
+                                        }
+                                        return const AlertDialog(
+                                          content: SizedBox.square(
+                                            dimension: 70,
+                                            child: Center(
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      barrierDismissible: false);
                                 }
                               }
                             }),
