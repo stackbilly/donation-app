@@ -140,7 +140,7 @@ class _DonationFieldState extends State<DonationField> {
               scheme: 'https',
               host: "fa76-105-61-143-234.eu.ngrok.io",
               path: '/mpesa'),
-          accountReference: nameController.text,
+          accountReference: '8006090',
           phoneNumber: phoneController.text,
           baseUri: Uri(scheme: 'https', host: "sandbox.safaricom.co.ke"),
           transactionDesc: 'Donate for ${widget.category}',
