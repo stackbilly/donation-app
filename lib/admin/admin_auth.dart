@@ -49,7 +49,7 @@ class _AdminLoginState extends State<AdminLogin> {
 
   Future<void> mailCode(int code) async {
     final Email email = Email(
-      body: 'Verifiication code: $code',
+      body: 'Verification code: $code',
       recipients: [(emailController.text)],
       subject: 'Verification code for login @ ${DateTime.now()}',
       isHTML: false,
