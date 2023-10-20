@@ -101,6 +101,7 @@ class _DonationFieldState extends State<DonationField> {
       DocumentSnapshot jointTotalSnapshot =
           await transaction.get(jointTotalReference);
       if (!snapshot.exists || !jointTotalSnapshot.exists) {
+        // ignore: use_build_context_synchronously
         showDialog(
             context: context,
             builder: (context) {
@@ -454,6 +455,7 @@ class _TestDonationState extends State<TestDonation> {
       DocumentSnapshot jointTotalSnapshot =
           await transaction.get(jointTotalReference);
       if (!snapshot.exists || !jointTotalSnapshot.exists) {
+        // ignore: use_build_context_synchronously
         showDialog(
             context: context,
             builder: (context) {

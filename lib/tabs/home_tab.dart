@@ -71,7 +71,7 @@ class _HomePageTabState extends State<HomePageTab> {
                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: Text(
               'Hello,',
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
           Padding(
@@ -91,7 +91,7 @@ class _HomePageTabState extends State<HomePageTab> {
                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: Text(
               'Choose where to donate',
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
           Padding(
@@ -339,7 +339,7 @@ class _HomePageTabState extends State<HomePageTab> {
                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: Text(
               'Send money donations through',
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
           Padding(
