@@ -96,14 +96,6 @@ class AdminHome extends StatelessWidget {
                   onTap: (() => true),
                 ),
                 ListTile(
-                  title: const Text('Donations'),
-                  leading: const Icon(Icons.list_alt),
-                  onTap: (() => Navigator.of(context)
-                          .push(DonationsApp.route(ContributionList(
-                        theme: theme,
-                      )))),
-                ),
-                ListTile(
                   title: const Text('Expenditures'),
                   leading: const Icon(Icons.money_off_sharp),
                   onTap: (() => Navigator.of(context)
@@ -157,71 +149,6 @@ class AdminHome extends StatelessWidget {
               size: 25,
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class ContributionList extends StatefulWidget {
-  const ContributionList({super.key, required this.theme});
-
-  final bool theme;
-  @override
-  State<ContributionList> createState() => _ContributionListState();
-}
-
-class _ContributionListState extends State<ContributionList> {
-  final Stream<QuerySnapshot> contributionStream = FirebaseFirestore.instance
-      .collection('donations')
-      .orderBy('timestamp', descending: true)
-      .snapshots();
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.indigo),
-      debugShowCheckedModeBanner: false,
-      darkTheme: ThemeData.dark(),
-      themeMode: (widget.theme) ? ThemeMode.dark : ThemeMode.light,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Contribution List'),
-          leading: InkWell(
-            child: const Icon(Icons.arrow_back),
-            onTap: () => Navigator.pop(context),
-          ),
-        ),
-        body: StreamBuilder(
-          stream: contributionStream,
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return const Text('An error occurred!');
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            final data = snapshot.requireData;
-            return ListView.builder(
-                itemCount: data.size,
-                itemBuilder: ((context, index) {
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.orange,
-                      child: Text(
-                        data.docs[index]['category']
-                            .toString()[0]
-                            .toUpperCase(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    title: Text(
-                        '${data.docs[index]['name']}, Tel: ${data.docs[index]['phoneNo']}'),
-                    subtitle: Text(
-                        'Donated ${data.docs[index]['amount']} for ${data.docs[index]['category']} on ${(data.docs[index]['timestamp'] as Timestamp).toDate().toString().split(' ').first}'),
-                  );
-                }));
-          },
         ),
       ),
     );
