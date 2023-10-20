@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:donations_app/app.dart';
 import 'package:donations_app/fields/donate_field.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
@@ -423,7 +424,10 @@ class _HomePageTabState extends State<HomePageTab> {
                         left: 20.0,
                         top: 120.0,
                         child: ElevatedButton(
-                          onPressed: (() => true),
+                          onPressed: (() => Navigator.of(context).push(
+                              CupertinoPageRoute(
+                                  builder: (context) =>
+                                      const DonationInfoPage()))),
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red[900],
                               shape: RoundedRectangleBorder(
@@ -445,6 +449,116 @@ class _HomePageTabState extends State<HomePageTab> {
         ],
       ),
     );
+  }
+}
+
+class DonationInfoPage extends StatelessWidget {
+  const DonationInfoPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        title: "How is donation distributed",
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(primarySwatch: Colors.indigo),
+        home: Scaffold(
+            extendBodyBehindAppBar: true,
+            appBar: AppBar(
+              title: const Text("Donation Distribution"),
+              leading: InkWell(
+                onTap: (() => Navigator.of(context).pop()),
+                child: const Icon(Icons.arrow_back),
+              ),
+            ),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding:
+                          EdgeInsets.only(left: 15.0, top: 10.0, right: 15.0),
+                      child: Text(
+                        "This is how your donations & shared meals are distributed",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 20),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 15.0, top: 10.0, right: 10.0),
+                      child: Text(
+                        "Charity Association is part of the Tharaka University Charity Programme."
+                        "It enables students from unfortunate backgrounds and those in need secure"
+                        " funding for their university education and upkeep by applying for grants and"
+                        " contributions of donations from staffs and students.",
+                        style: TextStyle(
+                            color: Colors.blueGrey.shade600, fontSize: 15),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5.0, left: 15.0),
+                      child: Text("Here is how it works.",
+                          style: TextStyle(
+                              color: Colors.grey.shade900, fontSize: 16)),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 5.0, left: 15.0),
+                      child: Text("1. Choose where you want to help.",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500, fontSize: 16)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          top: 5.0, left: 15.0, right: 10.0),
+                      child: Text(
+                          "There are 2 areas of donations."
+                          " Donations for Fees and Upkeep. You can select one area to donate any amount. Your donation will go to fund your selected area."
+                          "There are also campaigns, campaigns are essential for emergency events that require "
+                          "help through donations. The donations go to a specific campaign selected to fund the campaign goals.",
+                          style: TextStyle(
+                              color: Colors.blueGrey.shade600, fontSize: 15)),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 5.0, left: 15.0),
+                      child: Text(
+                          "2. Charity Association delivers your donation to the area of need.",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500, fontSize: 16)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          top: 5.0, left: 15.0, right: 10.0),
+                      child: Text(
+                          'All donations go to the Charity account. Students in need are '
+                          'identified and are allowed to apply for grant. Student in severe '
+                          'unfortunate situations are considered most. Meals and tangible donations '
+                          'are shared door to door.',
+                          style: TextStyle(
+                              color: Colors.blueGrey.shade600, fontSize: 15)),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 5.0, left: 15.0),
+                      child: Text("3. See the impact of your donation.",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500, fontSize: 16)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          top: 5.0, left: 15.0, right: 10.0),
+                      child: Text(
+                          'Through this application, Charity Association '
+                          'will provide meals, money donations and life saving opportunities to students '
+                          'but most importantly be able to build long-term, resilient solutions '
+                          'that will help students overcome hunger and poverty.',
+                          style: TextStyle(
+                              color: Colors.blueGrey.shade600, fontSize: 15)),
+                    ),
+                  ],
+                ),
+              ),
+            )));
   }
 }
 
