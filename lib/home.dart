@@ -6,6 +6,7 @@ import 'package:donations_app/tabs/active_campaigns_tab.dart';
 import 'package:donations_app/tabs/home_tab.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 // ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
 
@@ -52,8 +53,13 @@ class _HomePageState extends State<HomePage> {
                   ),
                   actions: [
                     IconButton(
-                        onPressed: (() => true),
-                        icon: const Icon(Icons.notifications))
+                        onPressed: (() => Navigator.of(context)
+                            .pushAndRemoveUntil(
+                                CupertinoPageRoute(
+                                    builder: (context) =>
+                                        HomePage(theme: widget.theme)),
+                                (route) => false)),
+                        icon: const Icon(Icons.refresh))
                   ],
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -116,7 +122,10 @@ class _HomePageState extends State<HomePage> {
                         Icons.contact_mail,
                       ),
                       title: const Text('Contact us'),
-                      onTap: (() => true),
+                      onTap: (() => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                              builder: (context) =>
+                                  SendEmail(theme: widget.theme)))),
                     ),
                     ListTile(
                       leading: const Icon(
@@ -132,7 +141,9 @@ class _HomePageState extends State<HomePage> {
                         Icons.info_outline,
                       ),
                       title: const Text('About Charity Association'),
-                      onTap: (() => true),
+                      onTap: (() => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                              builder: (context) => const DonationInfoPage()))),
                     ),
                     ListTile(
                       leading: (widget.theme)
@@ -160,6 +171,168 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             )));
+  }
+}
+
+class SendEmail extends StatefulWidget {
+  const SendEmail({super.key, required this.theme});
+
+  final bool theme;
+  @override
+  State<SendEmail> createState() => _SendEmailState();
+}
+
+class _SendEmailState extends State<SendEmail> {
+  final GlobalKey<FormState> _formKey = GlobalKey();
+
+  TextEditingController subjectController = TextEditingController();
+  TextEditingController messageController = TextEditingController();
+
+  @override
+  void dispose() {
+    subjectController.dispose();
+    messageController.dispose();
+
+    super.dispose();
+  }
+
+  Future<void> mailMessage() async {
+    final Email email = Email(
+      body: messageController.text,
+      recipients: [("livingstoneochadia95@gmail.com")],
+      subject: subjectController.text,
+      isHTML: false,
+    );
+    await FlutterEmailSender.send(email);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: "Send Email",
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.indigo),
+      darkTheme: ThemeData.dark(),
+      themeMode: widget.theme ? ThemeMode.dark : ThemeMode.light,
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text("Send Email"),
+          leading: InkWell(
+            onTap: () => Navigator.of(context).pop(),
+            child: const Icon(Icons.arrow_back),
+          ),
+        ),
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+              child: SizedBox(
+                height: 400,
+                width: 300,
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0)),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                            padding: EdgeInsets.all(20.0),
+                            child: Center(
+                              child: Text(
+                                "Enter email details",
+                                style: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 17),
+                              ),
+                            )),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 16.0),
+                          child: TextFormField(
+                            validator: ((value) {
+                              if (value == null || value.isEmpty) {
+                                return "subject cannot be empty";
+                              } else {
+                                return null;
+                              }
+                            }),
+                            controller: subjectController,
+                            decoration: InputDecoration(
+                                labelText: 'Subject',
+                                prefixIcon: const Icon(Icons.title),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10.0))),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 16.0),
+                          child: TextFormField(
+                            validator: ((value) {
+                              if (value == null || value.isEmpty) {
+                                return "message cannot be empty";
+                              } else {
+                                return null;
+                              }
+                            }),
+                            controller: messageController,
+                            decoration: InputDecoration(
+                                labelText: 'Message',
+                                prefixIcon: const Icon(Icons.message),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10.0))),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 70.0, top: 20.0),
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(150, 45),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15.0))),
+                            onPressed: (() {
+                              if (_formKey.currentState!.validate()) {
+                                mailMessage().then((value) => showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        content: SizedBox.square(
+                                          dimension: 80,
+                                          child: TextButton(
+                                            onPressed: (() => Navigator.of(
+                                                    context)
+                                                .pushAndRemoveUntil(
+                                                    CupertinoPageRoute(
+                                                        builder: (context) =>
+                                                            HomePage(
+                                                                theme: widget
+                                                                    .theme)),
+                                                    (route) => false)),
+                                            child: const Text("OK"),
+                                          ),
+                                        ),
+                                      );
+                                    }));
+                              }
+                            }),
+                            icon: const Icon(Icons.email),
+                            label: const Text("Send Mail"),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
